@@ -68,18 +68,27 @@ class FinalStack(Stack):
         source_output = codepipeline.Artifact()
         build_output = codepipeline.Artifact()
 
-        source_action = cpactions.CodeCommitSourceAction(
-            action_name="SourceAction",
-            repository=code_repo,
-            output=source_output
+        # Source stage that is configured to pull source code from the CodeCommit repository.
+        pipeline.add_stage(
+            stage_name="Source",
+            actions=[
+                cpactions.CodeCommitSourceAction(
+                    action_name="SourceAction",
+                    repository=code_repo,
+                    output=source_output
+                )
+            ]
         )
-
-        build_action = cpactions.CodeBuildAction(
-            action_name="BuildAction",
-            project=build_project,
-            input=source_output,
-            outputs=[build_output]
+        
+        # Build stage that take source code and build it using CodeBuild
+        pipeline.add_stage(
+            stage_name="Build",
+            actions=[
+                cpactions.CodeBuildAction(
+                    action_name="BuildAction",
+                    project=build_project,
+                    input=source_output,
+                    outputs=[build_output]
+                )
+            ]
         )
-
-        pipeline.add_stage(stage_name="Source", actions=[source_action])
-        pipeline.add_stage(stage_name="Build", actions=[build_action])
